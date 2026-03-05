@@ -1,0 +1,8 @@
+services:
+  mission-control:
+    build: .
+    container_name: mission-control-mvp
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production

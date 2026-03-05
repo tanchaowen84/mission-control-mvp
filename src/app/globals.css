@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f4f8ff;
+  --bg-alt: #dbe7ff;
+  --surface: #ffffff;
+  --panel: #f7fbff;
+  --foreground: #0f1a2e;
+  --muted: #58647d;
+  --border: #c9d4ec;
+  --accent: #1367e9;
+  --accent-contrast: #f7fbff;
+  --danger: #b4232f;
+}
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-surface: var(--surface);
+  --color-panel: var(--panel);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-danger: var(--danger);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 8% 10%, #c5dcff 0%, transparent 25%),
+    radial-gradient(circle at 90% 20%, #bfdaf7 0%, transparent 30%),
+    linear-gradient(150deg, var(--bg), var(--bg-alt));
+  color: var(--foreground);
+  font-family: var(--font-display), "Avenir Next", "Segoe UI", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.glass-panel {
+  border: 1px solid color-mix(in oklab, var(--border), white 15%);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--surface), white 8%);
+  box-shadow: 0 10px 30px rgba(15, 26, 46, 0.08);
+}
+
+.card-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--foreground);
+  padding: 0.55rem 0.7rem;
+  font-size: 0.9rem;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: 2px solid color-mix(in oklab, var(--accent), white 55%);
+  outline-offset: 1px;
+}
+
+.btn {
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--surface);
+}
+
+.btn:hover {
+  border-color: var(--accent);
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.18rem 0.55rem;
+  font-size: 0.72rem;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--surface), white 8%);
+}
+
+@media (max-width: 768px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
