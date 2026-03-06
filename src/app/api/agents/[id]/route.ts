@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { parseBody, toApiError } from "@/lib/api";
+import { proxyOpenClaw } from "@/lib/openclaw";
 import { agentSchema } from "@/lib/validators";
 
-export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const proxied = await proxyOpenClaw({ request, path: `/agents/${id}` });
+  if (proxied) return proxied;
+
   const agent = await db.agent.findUnique({
     where: { id },
     include: { parent: true, children: true, assignedTasks: true, desk: true },
@@ -21,6 +25,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   try {
     const { id } = await params;
     const body = parseBody(agentSchema.partial(), await request.json());
+    const proxied = await proxyOpenClaw({ request, path: `/agents/${id}`, method: "PATCH", body });
+    if (proxied) return proxied;
 
     const existing = await db.agent.findUnique({ where: { id } });
     if (!existing) {
@@ -56,8 +62,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const proxied = await proxyOpenClaw({ request, path: `/agents/${id}`, method: "DELETE" });
+  if (proxied) return proxied;
 
   const existing = await db.agent.findUnique({ where: { id } });
   if (!existing) {

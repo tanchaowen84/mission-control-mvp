@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { parseBody, toApiError } from "@/lib/api";
+import { proxyOpenClaw } from "@/lib/openclaw";
 import { deskSchema } from "@/lib/validators";
 
-export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const proxied = await proxyOpenClaw({ request, path: `/desks/${id}` });
+  if (proxied) return proxied;
 
   const desk = await db.desk.findUnique({
     where: { id },
@@ -22,6 +25,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   try {
     const { id } = await params;
     const body = parseBody(deskSchema.partial(), await request.json());
+    const proxied = await proxyOpenClaw({ request, path: `/desks/${id}`, method: "PATCH", body });
+    if (proxied) return proxied;
 
     const existing = await db.desk.findUnique({ where: { id } });
     if (!existing) {
@@ -46,8 +51,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const proxied = await proxyOpenClaw({ request, path: `/desks/${id}`, method: "DELETE" });
+  if (proxied) return proxied;
 
   const existing = await db.desk.findUnique({ where: { id } });
   if (!existing) {

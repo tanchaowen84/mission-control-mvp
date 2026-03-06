@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { parseBody, toApiError } from "@/lib/api";
+import { proxyOpenClaw } from "@/lib/openclaw";
 import { deskSchema } from "@/lib/validators";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const proxied = await proxyOpenClaw({ request, path: "/desks" });
+  if (proxied) return proxied;
+
   const desks = await db.desk.findMany({
     include: {
       agent: true,
@@ -17,6 +21,8 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = parseBody(deskSchema, await request.json());
+    const proxied = await proxyOpenClaw({ request, path: "/desks", method: "POST", body });
+    if (proxied) return proxied;
 
     const desk = await db.desk.create({
       data: {

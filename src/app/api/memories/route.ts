@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { parseBody, toApiError } from "@/lib/api";
+import { proxyOpenClaw } from "@/lib/openclaw";
 import { memorySchema } from "@/lib/validators";
 
 export async function GET(request: Request) {
+  const proxied = await proxyOpenClaw({ request, path: "/memories" });
+  if (proxied) return proxied;
+
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim();
   const lowered = q?.toLowerCase();
@@ -40,6 +44,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = parseBody(memorySchema, await request.json());
+    const proxied = await proxyOpenClaw({ request, path: "/memories", method: "POST", body });
+    if (proxied) return proxied;
 
     const memory = await db.memory.create({
       data: {

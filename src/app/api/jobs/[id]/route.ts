@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { parseBody, toApiError } from "@/lib/api";
+import { proxyOpenClaw } from "@/lib/openclaw";
 import { jobSchema } from "@/lib/validators";
 
-export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const proxied = await proxyOpenClaw({ request, path: `/jobs/${id}` });
+  if (proxied) return proxied;
+
   const job = await db.job.findUnique({ where: { id } });
 
   if (!job) {
@@ -18,6 +22,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   try {
     const { id } = await params;
     const body = parseBody(jobSchema.partial(), await request.json());
+    const proxied = await proxyOpenClaw({ request, path: `/jobs/${id}`, method: "PATCH", body });
+    if (proxied) return proxied;
 
     const existing = await db.job.findUnique({ where: { id } });
     if (!existing) {
@@ -41,8 +47,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const proxied = await proxyOpenClaw({ request, path: `/jobs/${id}`, method: "DELETE" });
+  if (proxied) return proxied;
 
   const existing = await db.job.findUnique({ where: { id } });
   if (!existing) {

@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { parseBody, toApiError } from "@/lib/api";
+import { proxyOpenClaw } from "@/lib/openclaw";
 import { agentSchema } from "@/lib/validators";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const proxied = await proxyOpenClaw({ request, path: "/agents" });
+  if (proxied) return proxied;
+
   const agents = await db.agent.findMany({
     include: {
       parent: true,
@@ -20,6 +24,9 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = parseBody(agentSchema, await request.json());
+    const proxied = await proxyOpenClaw({ request, path: "/agents", method: "POST", body });
+    if (proxied) return proxied;
+
     if (body.parentId) {
       const parent = await db.agent.findUnique({ where: { id: body.parentId } });
       if (!parent) {

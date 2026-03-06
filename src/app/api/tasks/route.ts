@@ -2,9 +2,13 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { parseBody, toApiError } from "@/lib/api";
 import { taskStatuses } from "@/lib/constants";
+import { proxyOpenClaw } from "@/lib/openclaw";
 import { taskSchema } from "@/lib/validators";
 
 export async function GET(request: Request) {
+  const proxied = await proxyOpenClaw({ request, path: "/tasks" });
+  if (proxied) return proxied;
+
   const { searchParams } = new URL(request.url);
   const statusParam = searchParams.get("status");
   const status =
@@ -31,6 +35,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = parseBody(taskSchema, await request.json());
+    const proxied = await proxyOpenClaw({ request, path: "/tasks", method: "POST", body });
+    if (proxied) return proxied;
 
     const task = await db.task.create({
       data: {

@@ -1,6 +1,6 @@
 # Mission Control MVP
 
-Mission Control is a production-usable MVP dashboard for OpenClaw built with Next.js App Router, TypeScript, Prisma, SQLite, and Tailwind CSS.
+Mission Control is a production-usable MVP dashboard for OpenClaw built with Next.js App Router, TypeScript, Prisma, SQLite, and Tailwind CSS. It supports both local Prisma-backed mode and real OpenClaw upstream mode.
 
 ## MVP Features
 
@@ -12,6 +12,7 @@ Mission Control is a production-usable MVP dashboard for OpenClaw built with Nex
 - Team/Org screen with agent roles, devices, missions, and parent-child hierarchy.
 - Scheduler screen with cron jobs, `next_run`, and enabled toggle persisted in DB.
 - Office view with lightweight 2D desk grid and agent placements.
+- In-app chat panel wired to OpenClaw chat APIs (with local fallback mode for offline/dev).
 - CRUD API routes for all core modules.
 
 ## Tech Stack
@@ -40,6 +41,14 @@ HOME="$PWD/.home" npm_config_cache="$PWD/.npm-cache" npm install
 ```bash
 cp .env.example .env
 ```
+
+Optional for real OpenClaw data mode:
+
+- `OPENCLAW_API_URL` points at the OpenClaw server base URL.
+- `OPENCLAW_API_KEY` adds bearer auth.
+- `OPENCLAW_API_PREFIX` sets upstream API prefix (default `/api`).
+- `OPENCLAW_CHAT_PATH` sets upstream chat endpoint path (default `/chat`).
+- `OPENCLAW_TIMEOUT_MS` sets upstream timeout (default `15000`).
 
 3. Run setup (generate client, push schema, seed DB):
 
@@ -78,6 +87,7 @@ It installs dependencies and runs database setup + seed.
 ## API Endpoints
 
 - `GET /api/health`
+- `POST /api/chat`
 - `GET,PUT /api/mission`
 - `GET,POST /api/tasks`
 - `GET,PATCH,DELETE /api/tasks/:id`

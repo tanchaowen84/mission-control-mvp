@@ -57,3 +57,14 @@ export const deskSchema = z.object({
   y: z.number().int().min(0).max(24),
   label: z.string().min(1).max(40),
 });
+
+const chatHistoryMessageSchema = z.object({
+  role: z.enum(["system", "user", "assistant"]),
+  content: z.string().min(1).max(4000),
+});
+
+export const chatRequestSchema = z.object({
+  message: z.string().min(1).max(4000),
+  conversationId: z.string().min(1).max(200).optional(),
+  history: z.array(chatHistoryMessageSchema).max(40).optional().default([]),
+});

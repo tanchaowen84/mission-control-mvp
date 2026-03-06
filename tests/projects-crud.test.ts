@@ -64,7 +64,7 @@ describe("/api/projects CRUD", () => {
     expect(created.name).toBe("Mission QA");
     expect(created.status).toBe("ACTIVE");
 
-    const listResponse = await GET();
+    const listResponse = await GET(new Request("http://localhost/api/projects"));
     expect(listResponse.status).toBe(200);
 
     const list = await listResponse.json();

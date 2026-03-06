@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { parseBody, toApiError } from "@/lib/api";
+import { proxyOpenClaw } from "@/lib/openclaw";
 import { taskSchema } from "@/lib/validators";
 
-export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const proxied = await proxyOpenClaw({ request, path: `/tasks/${id}` });
+  if (proxied) return proxied;
+
   const task = await db.task.findUnique({
     where: { id },
     include: { assignee: true, project: true },
@@ -21,6 +25,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   try {
     const { id } = await params;
     const body = parseBody(taskSchema.partial(), await request.json());
+    const proxied = await proxyOpenClaw({ request, path: `/tasks/${id}`, method: "PATCH", body });
+    if (proxied) return proxied;
 
     const existing = await db.task.findUnique({ where: { id } });
     if (!existing) {
@@ -47,8 +53,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const proxied = await proxyOpenClaw({ request, path: `/tasks/${id}`, method: "DELETE" });
+  if (proxied) return proxied;
 
   const existing = await db.task.findUnique({ where: { id } });
   if (!existing) {
